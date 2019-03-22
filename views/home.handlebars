@@ -1,0 +1,73 @@
+<div id="subComment">
+
+</div>
+<div id="showComment">
+
+</div>
+<script>
+
+    let currentlyCommenting = false;
+
+    $.ajax({
+        method: "GET",
+        url: "/articles"
+    }).then(function(data){
+        console.log(data);
+        
+        for(i = 0; i < 10; i++){
+            $("body").append("<h1 >" + data[i].title + "</h1>" + "<p>" + data[i].link + "</p>" + "<p> <button type='addComment' id='" + data[i]._id + "'>add comment</button> + <button type='showComment' comid='" + data[i].comment + "'>Show Comment</button>");
+        }
+    });
+    $(document).on("click", "button", function(){
+        showComButt = $(this).attr("comid")
+        clicked = $(this).attr("type");
+        console.log(clicked);
+        clickedId = $(this).attr("id");
+        if(clicked === "addComment" && currentlyCommenting == false){
+            currentlyCommenting = true;
+            $("#subComment").prepend(
+                "<input id='comment-title'>" +
+                "<input id='comment-body'>" +
+                "<button articleId='" + clickedId + "'id='comment-submit'>Submit</button>" 
+            )
+        }
+        if(clicked === "showComment"){
+            $.ajax({
+                method: "GET",
+                url: "/comments"
+                }).then(function(data){
+                    console.log(data);
+                    
+                    for(i = 0; i < data.length; i++){
+                        if(showComButt === data[i]._id){
+                            $("#showComment").append("<h3> Title: " + data[i].title + "</h3>" + "<p>" + data[i].body + "</p>")
+                        }
+                    }
+                });
+        }
+    })
+    $(document).on("click", "#comment-submit",  function(){
+        //grab data from input boxes
+        titleData = $("#comment-title").val();
+        bodyData = $("#comment-body").val();
+        //check if the input boxes are empty, if they are dont run this code
+        if(titleData != "" && bodyData != ""){
+            //create object holding users comment
+            newComment = {
+                title: titleData,
+                body: bodyData
+            }
+            //post the comment the user inputed
+            $.ajax({
+                method: "POST",
+                url: "/articles/5c93fdc158194a1e802705c0",
+                data: newComment
+                }).then(function(data){
+                    console.log("successfully posted comment")
+                    $("#subComment").empty();
+                });
+        }
+    });
+    
+    
+</script>
